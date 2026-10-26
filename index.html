@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Hitchhiker's Guide Quest Compass</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- jsPDF CDN for PDF Report Generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* Custom Retro Sci-Fi & Glassmorphism Styling */
+        @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
+        
+        body {
+            font-family: 'Fira Code', monospace;
+            background-color: #030712;
+            color: #22d3ee;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(6, 182, 212, 0.08) 0%, transparent 60%),
+                linear-gradient(to bottom, rgba(0,0,0,0.85), rgba(3,7,18,0.95));
+            background-attachment: fixed;
+        }
+
+        /* Scanline Overlay Effect */
+        .scanline-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 99;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        /* Glassmorphic Panel Cards */
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        /* CRT Glowing Text */
+        .crt-glow {
+            text-shadow: 0 0 8px rgba(34, 211, 238, 0.6);
+        }
+        .crt-glow-amber {
+            text-shadow: 0 0 8px rgba(251, 191, 36, 0.6);
+        }
+
+        /* Custom Retro Buttons */
+        .btn-retro {
+            background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+            border: 1px solid #22d3ee;
+            color: #ffffff;
+            transition: all 0.2s ease;
+            box-shadow: 0 0 10px rgba(34, 211, 238, 0.2);
+        }
+        .btn-retro:hover:not(:disabled) {
+            background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.5);
+            transform: translateY(-1px);
+        }
+        .btn-amber {
+            background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+            border: 1px solid #fbbf24;
+            box-shadow: 0 0 10px rgba(251, 191, 36, 0.2);
+        }
+        .btn-amber:hover:not(:disabled) {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            box-shadow: 0 0 15px rgba(251, 191, 36, 0.5);
+        }
+
+        /* Navigation Tabs */
+        .nav-tab {
+            border-bottom: 2px solid transparent;
+            transition: all 0.2s ease;
+        }
+        .nav-tab.active {
+            border-bottom-color: #fbbf24;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.1);
+        }
+
+        /* Multiple Choice Quiz Items */
+        .quiz-option {
+            background: rgba(15, 23, 42, 0.9);
+            border: 1px solid rgba(34, 211, 238, 0.2);
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .quiz-option:hover {
+            border-color: #22d3ee;
+            background: rgba(34, 211, 238, 0.1);
+        }
+        .quiz-option.selected {
+            border-color: #fbbf24;
+            background: rgba(251, 191, 36, 0.15);
+            color: #fbbf24;
+            font-weight: bold;
+        }
+        .quiz-option.correct {
+            border-color: #10b981 !important;
+            background: rgba(16, 185, 129, 0.2) !important;
+            color: #34d399 !important;
+        }
+        .quiz-option.incorrect {
+            border-color: #ef4444 !important;
+            background: rgba(239, 68, 68, 0.2) !important;
+            color: #f87171 !important;
+        }
+
+        /* Custom Scrollbars */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #030712; }
+        ::-webkit-scrollbar-thumb { background: #0891b2; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #22d3ee; }
+    </style>
+</head>
+<body class="min-h-screen p-3 sm:p-6 pb-20 relative">
+
+    <div class="scanline-overlay"></div>
+
+    <!-- MAIN WRAPPER CONTAINER -->
+    <main class="max-w-6xl mx-auto space-y-6">
+
+        <!-- HEADER & TOP METRICS BAR -->
+        <header class="glass-panel rounded-xl p-4 sm:p-6 relative overflow-hidden">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 border-b border-cyan-500/30 pb-4">
+                <div>
+                    <span class="text-[10px] uppercase tracking-widest text-amber-400 font-bold bg-amber-950/80 px-2.5 py-1 rounded border border-amber-600/50">
+                        Galactic Sub-Sector Assessment Terminal
+                    </span>
+                    <h1 class="text-2xl sm:text-3xl font-bold crt-glow text-cyan-300 mt-1">
+                        THE HITCHHIKER'S GUIDE QUEST COMPASS
+                    </h1>
+                    <p class="text-xs text-slate-300 mt-0.5">
+                        Part 1 Review: Prologue & Chapters 1–9 • Authentic Junior Pitch Project
+                    </p>
+                </div>
+
+                <!-- 50-Minute Clock Display -->
+                <div class="flex items-center gap-3 bg-slate-950/90 border border-cyan-500/50 p-3 rounded-lg">
+                    <div class="text-right">
+                        <span class="text-[10px] block text-slate-400 uppercase tracking-wider font-semibold">50-Min Session Clock</span>
+                        <span id="timerDisplay" class="text-xl sm:text-2xl font-bold text-amber-400 font-mono tracking-wider">50:00</span>
+                    </div>
+                    <div class="flex flex-col gap-1">
+                        <button id="startTimerBtn" onclick="toggleTimer()" class="btn-retro text-[10px] px-2 py-1 rounded">Start Clock</button>
+                        <button onclick="resetTimer()" class="bg-slate-800 text-slate-300 hover:text-white text-[10px] px-2 py-0.5 rounded border border-slate-700">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Student Metadata & 50/50 Grade Breakdown Banner -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4 text-xs">
+                <div>
+                    <label for="studentName" class="block text-[11px] font-bold text-cyan-300 mb-1">Student Operative Name:</label>
+                    <input type="text" id="studentName" placeholder="Enter full name..." class="w-full bg-slate-950 border border-cyan-800 p-2 rounded text-cyan-200 focus:outline-none focus:border-cyan-400">
+                </div>
+                <div>
+                    <label for="classPeriod" class="block text-[11px] font-bold text-cyan-300 mb-1">Class Period / Sector:</label>
+                    <input type="text" id="classPeriod" placeholder="e.g. Period 3 / Sector 4" class="w-full bg-slate-950 border border-cyan-800 p-2 rounded text-cyan-200 focus:outline-none focus:border-cyan-400">
+                </div>
+                <div class="bg-slate-950/80 border border-amber-400/50 p-2 rounded flex flex-col justify-center">
+                    <span class="text-[10px] font-bold text-amber-300 uppercase tracking-wider">Evaluation Grade Structure</span>
+                    <span class="text-[11px] text-slate-200 font-semibold mt-0.5">
+                        50% Step 1 Security Quiz + 50% Video Pitch Recording
+                    </span>
+                </div>
+            </div>
+        </header>
+
+
+        <!-- NAVIGATION TABS -->
+        <nav class="flex flex-wrap gap-2 border-b border-cyan-900 pb-2">
+            <button id="tabBtn0" onclick="switchTab(0)" class="nav-tab active px-4 py-2 text-xs font-bold rounded-t-lg">
+                Step 1: Clearance Quiz
+            </button>
+            <button id="tabBtn1" onclick="switchTab(1)" class="nav-tab px-4 py-2 text-xs font-bold rounded-t-lg">
+                Step 2: Mission Briefing
+            </button>
+            <button id="tabBtn2" onclick="switchTab(2)" class="nav-tab px-4 py-2 text-xs font-bold rounded-t-lg">
+                Step 3: Tech Focus & Rubric
+            </button>
+            <button id="tabBtn3" onclick="switchTab(3)" class="nav-tab px-4 py-2 text-xs font-bold rounded-t-lg">
+                Step 4: AI & Canva Studio
+            </button>
+            <button id="tabBtn4" onclick="switchTab(4)" class="nav-tab px-4 py-2 text-xs font-bold rounded-t-lg">
+                Step 5: Submission & PDF Report
+            </button>
+        </nav>
+
+
+        <!-- ================= STEP 1: SECURITY CLEARANCE QUIZ ================= -->
+        <section id="panel0" class="glass-panel rounded-xl p-5 sm:p-7 shadow-2xl">
+            <div class="border-b border-cyan-500/40 pb-3 mb-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+                <div>
+                    <h2 class="text-2xl font-bold crt-glow text-cyan-300">Step 1: Vogon Security Clearance Verification</h2>
+                    <p class="text-xs text-slate-300 mt-1">
+                        Answer 5 random multiple-choice questions drawn from the 50-question bank to establish your knowledge baseline (50% of Total Grade).
+                    </p>
+                </div>
+                
+                <!-- Redraw Limit Status Counter -->
+                <div class="bg-slate-950 border border-amber-400/60 px-3 py-2 rounded-lg text-right shrink-0">
+                    <span id="redrawLockStatus" class="text-xs text-amber-300 font-bold block">Draws Remaining: 3/3</span>
+                    <span class="text-[10px] text-slate-400">Strict 3-Draw Limit</span>
+                </div>
+            </div>
+
+            <!-- Quiz Questions Container -->
+            <div id="quizQuestionsContainer" class="space-y-6 mb-8">
+                <!-- Dynamically populated by JS -->
+            </div>
+
+            <!-- Quiz Action Bar -->
+            <div class="flex flex-wrap justify-between items-center gap-4 border-t border-cyan-500/40 pt-5">
+                <div class="flex items-center gap-3">
+                    <button id="drawQuestionsBtn" onclick="resetQuizAndPickNewQuestions()" class="btn-retro text-xs px-4 py-2.5 rounded-lg flex items-center gap-2">
+                        🔄 Draw New Qs (<span id="drawBtnCount">3 Left</span>)
+                    </button>
+                    <span id="drawCountBadge" class="text-xs text-slate-400">Limit: 3 Total Draws</span>
+                </div>
+
+                <div class="flex items-center gap-4">
+                    <div class="text-right">
+                        <span class="text-[10px] text-slate-400 block uppercase">Quiz Score Status (50% Grade)</span>
+                        <span id="quizScoreDisplay" class="text-sm font-bold text-amber-300 block">0 / 5 Correct (0 / 50 Points)</span>
+                    </div>
+                    <button id="submitQuizBtn" onclick="evaluateQuiz()" class="btn-retro btn-amber text-xs px-6 py-2.5 rounded-lg font-bold">
+                        🔒 Lock Answers & Evaluate Score
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= STEP 2: MISSION BRIEFING ================= -->
+        <section id="panel1" class="glass-panel rounded-xl p-5 sm:p-7 shadow-2xl hidden">
+            <div class="border-b border-cyan-500/40 pb-3 mb-6">
+                <h2 class="text-2xl font-bold crt-glow text-cyan-300">Step 2: Mission Briefing — Peer Video Hook</h2>
+                <p class="text-xs text-slate-300 mt-1">Welcome to your primary field assignment. Read your objective below.</p>
+            </div>
+
+            <div class="space-y-5 text-sm text-slate-200 leading-relaxed">
+                <div class="bg-slate-950/80 border-l-4 border-amber-400 p-4 rounded-r-xl">
+                    <h3 class="text-amber-300 font-bold uppercase text-xs tracking-wider mb-1">📢 Your Mission Objective</h3>
+                    <p class="text-xs sm:text-sm">
+                        You are creating an authentic, 60-to-90-second video recording to promote and convince next year's incoming class of juniors to read <em>The Hitchhiker's Guide to the Galaxy</em>! Your video will serve as a real promotional hook shown to future students before they start the book.
+                    </p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs">
+                    <div class="bg-slate-950/80 border border-cyan-500/60 p-4 rounded-xl">
+                        <h4 class="font-bold text-cyan-300 mb-2 uppercase text-xs tracking-wider">✨ Digital Props & FX Guide (Classroom-Ready)</h4>
+                        <p class="text-slate-300 mb-2">Since you're working on laptops in class, use <strong>Canva's free online video tools</strong> to add digital props and effects that match the book's sci-fi design:</p>
+                        <ul class="list-disc list-inside space-y-1 text-slate-300">
+                            <li><strong class="text-amber-300">Digital Towel Sticker:</strong> Overlay a bath towel graphic sticker near your shoulder in Canva!</li>
+                            <li><strong class="text-amber-300">CRT Terminal Filter:</strong> Apply a dark retro green/cyan filter overlay matching the terminal look.</li>
+                            <li><strong class="text-amber-300">Animated Text Overlays:</strong> Display big, glowing bold text like <em>"DON'T PANIC!"</em> or <em>"MOSTLY HARMLESS"</em> on screen.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-950/80 border border-cyan-500/60 p-4 rounded-xl">
+                        <h4 class="font-bold text-cyan-300 mb-2 uppercase text-xs tracking-wider">🎯 Core Video Content Rules</h4>
+                        <ul class="list-disc list-inside space-y-2 text-xs text-slate-300">
+                            <li>Speak directly to incoming juniors as an experienced, enthusiastic peer.</li>
+                            <li>Weave in your two drawn tech focus points as proof of the book's cleverness.</li>
+                            <li>Explain how the gadgets connect to main plot events, character traits, or sci-fi themes.</li>
+                            <li>Capture Adams's signature dry humor and conclude with: <em>"DON'T PANIC!"</em></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="flex justify-end pt-2">
+                    <button onclick="switchTab(2)" class="btn-retro btn-amber px-6 py-2.5 text-xs sm:text-sm rounded-lg">
+                        Proceed to Step 3: Draw Tech Focus Points →
+                    </button>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= STEP 3: DUAL RANDOMIZER & PLAIN RUBRIC ================= -->
+        <section id="panel2" class="glass-panel rounded-xl p-5 sm:p-7 shadow-2xl hidden">
+            <div class="border-b border-cyan-500/40 pb-3 mb-6">
+                <h2 class="text-2xl font-bold crt-glow text-cyan-300">Step 3: Tech Focus Points & Evaluation Rubric</h2>
+                <p class="text-xs text-slate-300 mt-1">Spin to assign your two focus gadgets, then review the evaluation criteria.</p>
+            </div>
+
+            <!-- Randomizer Button -->
+            <div class="bg-slate-950/80 border border-cyan-800 rounded-xl p-5 text-center mb-6">
+                <p class="text-xs text-cyan-300 mb-3 uppercase tracking-widest font-bold">Spin to assign your two focus gadgets</p>
+                <button onclick="generateTechPairing()" class="btn-retro px-6 py-3 text-xs sm:text-sm rounded-lg border-2">
+                    🎲 Spin Tech Focus Randomizer
+                </button>
+            </div>
+
+            <!-- Focus Item Displays -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <!-- Focus #1 Card -->
+                <div class="bg-slate-950/90 border-2 border-cyan-400/80 rounded-xl p-5 relative shadow-lg">
+                    <span class="text-[10px] uppercase font-bold bg-cyan-950 text-cyan-300 px-2.5 py-1 rounded border border-cyan-700 inline-block mb-3">Focus #1: Early Chapters (Ch. 1–3)</span>
+                    <h3 id="tech1Title" class="text-xl font-bold text-amber-300 mb-1">=== Unassigned ===</h3>
+                    <p id="tech1Chapter" class="text-xs text-cyan-400 mb-3 italic">Click generate button above</p>
+                    <p id="tech1Desc" class="text-xs text-slate-300 leading-relaxed mb-4">Awaiting spin...</p>
+                    <div id="tech1Tags" class="flex flex-wrap gap-1.5">
+                        <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">No Literary Focus Selected</span>
+                    </div>
+                </div>
+
+                <!-- Focus #2 Card -->
+                <div class="bg-slate-950/90 border-2 border-amber-400/80 rounded-xl p-5 relative shadow-lg">
+                    <span class="text-[10px] uppercase font-bold bg-amber-950 text-amber-300 px-2.5 py-1 rounded border border-amber-700 inline-block mb-3">Focus #2: Later Chapters (Ch. 4–9)</span>
+                    <h3 id="tech2Title" class="text-xl font-bold text-amber-300 mb-1">=== Unassigned ===</h3>
+                    <p id="tech2Chapter" class="text-xs text-cyan-400 mb-3 italic">Click generate button above</p>
+                    <p id="tech2Desc" class="text-xs text-slate-300 leading-relaxed mb-4">Awaiting spin...</p>
+                    <div id="tech2Tags" class="flex flex-wrap gap-1.5">
+                        <span class="text-[10px] bg-slate-800 text-slate-400 px-2 py-0.5 rounded">No Literary Focus Selected</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <button id="lockPairingBtn" onclick="lockPairingAndShowRubric()" class="btn-retro btn-amber px-8 py-3 text-xs sm:text-sm rounded-lg">
+                    🔒 Lock In Tech Focus Points & Reveal Rubric
+                </button>
+            </div>
+
+            <!-- INTERACTIVE EVALUATION RUBRIC -->
+            <div id="rubricContainer" class="bg-slate-950/90 border-2 border-amber-400/80 rounded-xl p-5 hidden shadow-xl">
+                <div class="border-b border-amber-400/30 pb-3 mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
+                    <h3 class="text-lg font-bold text-amber-300 crt-glow flex items-center gap-2">
+                        <span>📊 Evaluation Rubric (50% Remaining Grade)</span>
+                    </h3>
+                    <span class="text-xs bg-amber-950 text-amber-300 px-3 py-1 rounded border border-amber-600 font-bold">
+                        50% Step 1 Quiz + 50% Video Recording
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
+                    <div class="bg-slate-900 p-3.5 rounded-lg border border-cyan-800">
+                        <h4 class="font-bold text-cyan-300 mb-1">1. Key Book Facts & Details</h4>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Accurately explains exact rules or functions from the book for both assigned focus items (e.g., how the Babel Fish works in the ear).
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 p-3.5 rounded-lg border border-cyan-800">
+                        <h4 class="font-bold text-cyan-300 mb-1">2. Plot & Conflict Connections</h4>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Shows how the tech items spark major plot turns, escape moments, or central conflicts in space.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 p-3.5 rounded-lg border border-cyan-800">
+                        <h4 class="font-bold text-cyan-300 mb-1">3. Character & Setting Details</h4>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Connects the technology to specific character traits (e.g., Ford Prefect's survival instincts) or setting environments.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 p-3.5 rounded-lg border border-cyan-800">
+                        <h4 class="font-bold text-cyan-300 mb-1">4. Peer Hook & Satire</h4>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Speaks directly and enthusiastically to future juniors while capturing Adams's signature absurdist humor.
+                        </p>
+                    </div>
+
+                    <div class="bg-slate-900 p-3.5 rounded-lg border border-cyan-800">
+                        <h4 class="font-bold text-cyan-300 mb-1">5. Digital Props & Visual FX</h4>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Uses Canva digital props (towel sticker, CRT terminal filter, dynamic text) to create a glowing sci-fi vibe.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= STEP 4: AI & CANVA SCRIPT STUDIO ================= -->
+        <section id="panel3" class="glass-panel rounded-xl p-5 sm:p-7 shadow-2xl hidden">
+            <div class="border-b border-cyan-500/40 pb-3 mb-6">
+                <h2 class="text-2xl font-bold crt-glow text-cyan-300">Step 4: AI Studio & Canva Recording Terminal</h2>
+                <p class="text-xs text-slate-300 mt-1">Generate an AI script outline, refine your dialogue, and record your pitch with digital props in Canva.</p>
+            </div>
+
+            <!-- AI Prompt Synthesizer Box -->
+            <div class="border border-cyan-500/40 bg-slate-950/80 rounded-xl p-5 mb-6">
+                <h3 class="text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">Automated AI Prompt Synthesizer</h3>
+                <p class="text-xs text-slate-300 mb-3">Copy this tailored prompt into ChatGPT or Gemini to jumpstart your script hook for incoming juniors.</p>
+                <textarea id="aiPromptBox" rows="4" readonly class="w-full text-xs text-cyan-300 bg-slate-950 p-3 rounded-lg border border-cyan-800 mb-3 font-mono"></textarea>
+                <button onclick="copyAiPrompt()" class="btn-retro btn-amber px-4 py-2 text-xs rounded-lg flex items-center gap-2">
+                    📋 Copy AI Prompt to Clipboard
+                </button>
+            </div>
+
+            <!-- Digital Props In-Class Reminder Banner -->
+            <div class="bg-slate-950/80 border border-amber-400/60 p-4 rounded-xl mb-6">
+                <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wider mb-2 flex items-center gap-2">
+                    <span>✨ In-Class Digital FX Checklist (Add inside Canva while recording!)</span>
+                </h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs text-slate-300">
+                    <div class="bg-slate-900/90 p-2.5 rounded border border-slate-800">
+                        <strong class="text-cyan-300 block mb-0.5">🟢 Digital Towel Sticker:</strong>
+                        Insert a towel graphic overlay near your shoulder in Canva.
+                    </div>
+                    <div class="bg-slate-900/90 p-2.5 rounded border border-slate-800">
+                        <strong class="text-cyan-300 block mb-0.5">⚡ CRT Terminal Filter:</strong>
+                        Apply dark green or cyan retro filters over your webcam frame.
+                    </div>
+                    <div class="bg-slate-900/90 p-2.5 rounded border border-slate-800">
+                        <strong class="text-cyan-300 block mb-0.5">💬 Animated Text Overlays:</strong>
+                        Add animated "DON'T PANIC" text overlays during your speech.
+                    </div>
+                </div>
+            </div>
+
+            <!-- Canva Recorder Quick Link -->
+            <div class="bg-cyan-950/40 border border-cyan-500/50 p-3.5 rounded-xl mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+                <span class="text-cyan-200">Ready to record? Launch Canva's free online video recorder:</span>
+                <a href="https://www.canva.com/features/online-video-recorder/" target="_blank" class="btn-retro btn-amber px-4 py-2 rounded text-xs shrink-0 inline-block font-bold">
+                    🔗 Open Canva Online Recorder ↗
+                </a>
+            </div>
+
+            <!-- Script Editor & Self-Checklist Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <!-- Checklist Sidebar -->
+                <div class="lg:col-span-5 bg-slate-950/80 border border-cyan-800 p-4 rounded-xl space-y-3">
+                    <h3 class="text-xs font-bold text-amber-300 uppercase tracking-wider border-b border-amber-400/30 pb-2">Script Self-Checklist</h3>
+                    
+                    <label class="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="checkPlot" onchange="updateChecklistProgress()" class="mt-0.5 rounded">
+                        <span><strong>Peer Hook & Audience:</strong> Addresses future juniors directly with an exciting opening hook.</span>
+                    </label>
+
+                    <label class="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="checkTech1" onchange="updateChecklistProgress()" class="mt-0.5 rounded">
+                        <span><strong>Focus Point #1 Detail:</strong> Explains exact functions & facts for item #1 accurately.</span>
+                    </label>
+
+                    <label class="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="checkTech2" onchange="updateChecklistProgress()" class="mt-0.5 rounded">
+                        <span><strong>Focus Point #2 Detail:</strong> Explains exact functions & facts for item #2 accurately.</span>
+                    </label>
+
+                    <label class="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="checkLit" onchange="updateChecklistProgress()" class="mt-0.5 rounded">
+                        <span><strong>Literary Connection:</strong> Connects tech items to plot, character, setting, or theme.</span>
+                    </label>
+
+                    <label class="flex items-start gap-2.5 text-xs text-slate-300 cursor-pointer">
+                        <input type="checkbox" id="checkFx" onchange="updateChecklistProgress()" class="mt-0.5 rounded">
+                        <span><strong>Digital Props & FX Plan:</strong> Planned Canva towel stickers, CRT green filter, or text overlays.</span>
+                    </label>
+
+                    <div class="bg-slate-900 p-3 rounded-lg border border-cyan-900 mt-3">
+                        <div class="flex justify-between text-xs mb-1">
+                            <span class="text-slate-400">Checklist Readiness:</span>
+                            <span id="checklistPercent" class="text-amber-400 font-bold">0%</span>
+                        </div>
+                        <div class="w-full bg-slate-950 h-2 rounded-full overflow-hidden border border-slate-800">
+                            <div id="checklistBar" class="bg-amber-400 h-full transition-all duration-300" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Textarea Editor -->
+                <div class="lg:col-span-7 flex flex-col">
+                    <label for="scriptText" class="block text-xs font-bold text-cyan-300 uppercase tracking-wider mb-2">
+                        Promo Hook Script Editor (60–90 Sec Target):
+                    </label>
+                    <textarea id="scriptText" rows="11" placeholder="[Type or paste your script here... Speak directly to next year's incoming juniors!]" class="w-full p-4 text-xs leading-relaxed text-cyan-100 bg-slate-950 rounded-lg border border-cyan-800 focus:outline-none focus:border-cyan-400 flex-grow"></textarea>
+                    
+                    <div class="flex justify-between items-center mt-3 text-[11px] text-slate-400">
+                        <span id="wordCountDisplay">Word count: 0 words</span>
+                        <span>Est. Speech Time: <strong id="readTimeDisplay" class="text-amber-300">0s</strong></span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+
+        <!-- ================= STEP 5: FINAL SUBMISSION & PDF ================= -->
+        <section id="panel4" class="glass-panel rounded-xl p-5 sm:p-7 shadow-2xl hidden">
+            <div class="border-b border-cyan-500/40 pb-3 mb-6">
+                <h2 class="text-2xl font-bold crt-glow text-amber-300">Step 5: Submission Terminal & PDF Report Generator</h2>
+                <p class="text-xs text-slate-300 mt-1">Verify your components, paste your shareable Canva video link, and compile your official submission report PDF.</p>
+            </div>
+
+            <!-- Submission Form -->
+            <div class="space-y-6">
+                <!-- Canva Link Input -->
+                <div class="bg-slate-950/80 border-2 border-amber-400/80 p-5 rounded-xl">
+                    <label for="canvaUrlInput" class="block text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+                        📎 Canva Shareable Video Recording Link:
+                    </label>
+                    <input type="url" id="canvaUrlInput" placeholder="https://www.canva.com/design/DAF.../watch" class="w-full p-3 text-xs rounded-lg border border-amber-400/60 bg-slate-950 text-amber-200 focus:outline-none focus:border-amber-300">
+                    <p class="text-[11px] text-slate-400 mt-2">
+                        Ensure you recorded your video on <a href="https://www.canva.com/features/online-video-recorder/" target="_blank" class="text-cyan-300 underline font-semibold">Canva's Online Video Recorder</a> and set link sharing permissions to "Anyone with the link can view".
+                    </p>
+                </div>
+
+                <!-- Digital Props Selection Checkboxes for PDF -->
+                <div class="bg-slate-950/70 border border-cyan-800 p-4 rounded-xl">
+                    <h3 class="font-bold text-cyan-300 uppercase text-xs mb-2 tracking-wider">Digital Props & Visual FX Utilized in Video:</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs text-slate-300">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="fxTowel" checked class="rounded">
+                            <span>Digital Towel Sticker Graphic</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="fxFilter" checked class="rounded">
+                            <span>CRT Retro / Green Terminal Filter</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="fxText" checked class="rounded">
+                            <span>"DON'T PANIC" Dynamic Text</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Submission Summary Table with Explicit 50/50 Breakdown -->
+                <div class="bg-slate-950/70 border border-cyan-800 p-5 rounded-xl space-y-2.5 text-xs">
+                    <h3 class="font-bold text-cyan-300 uppercase border-b border-cyan-800 pb-2 mb-3 tracking-wider">Submission Overview Summary</h3>
+                    
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Step 1 Security Quiz Score (50% Grade):</span>
+                        <span id="summaryQuizScore" class="font-bold text-amber-300">0 / 5 Correct (0 / 50 Points)</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Step 3 Focus Point #1 (Ch. 1–3):</span>
+                        <span id="summaryTech1" class="text-cyan-300">Unassigned</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Step 3 Focus Point #2 (Ch. 4–9):</span>
+                        <span id="summaryTech2" class="text-cyan-300">Unassigned</span>
+                    </div>
+
+                    <div class="flex justify-between items-center">
+                        <span class="text-slate-400">Rubric Checklist Readiness:</span>
+                        <span id="summaryChecklistPct" class="text-amber-300 font-bold">0%</span>
+                    </div>
+
+                    <div class="border-t border-slate-800 pt-2 text-[11px] text-slate-400 italic">
+                        * Note: The remaining 50% of your grade will be evaluated by your instructor directly from your submitted Canva video link against the Step 3 rubric.
+                    </div>
+                </div>
+
+                <!-- PDF Generation Action Button -->
+                <div class="text-center pt-4">
+                    <button onclick="generatePDFReport()" class="btn-retro btn-amber text-sm sm:text-base px-8 py-4 rounded-xl shadow-2xl flex items-center justify-center gap-3 mx-auto font-bold">
+                        <span>📄 Download Vogon_Official_Evaluation_Report.pdf</span>
+                    </button>
+                    <p id="pdfStatusMsg" class="text-xs text-cyan-300 mt-3 font-bold hidden"></p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // ================= FULL 50-QUESTION QUESTION BANK =================
+        const FULL_QUESTION_BANK = [
+            { q: "What gadget does Ford Prefect utilize to flag down the approaching Vogon constructor fleet?", options: ["A) Pan Galactic Gargle Blaster", "B) Electronic Thumb", "C) Sub-Etha Sens-O-Matic", "D) Matter Transferee"], ans: "B" },
+            { q: "What is the Guide's updated entry for planet Earth after Ford's 15 years of research?", options: ["A) Harmless", "B) Amazingly Primitive", "C) Mostly harmless", "D) Uninhabitable"], ans: "C" },
+            { q: "Why do the Dentrassi cooks assist hitchhikers in boarding Vogon ships?", options: ["A) They loathe Vogons and do it to annoy them", "B) They are paid in galactic credits", "C) They love human literature", "D) Orders from Zaphod"], ans: "A" },
+            { q: "How does the Babel Fish translate languages for its host?", options: ["A) It manipulates light waves", "B) It feeds on brainwaves and excretes telepathic speech signals", "C) It projects acoustic vibrations", "D) It alters vocal cords"], ans: "B" },
+            { q: "What official reason is given for demolishing Arthur Dent's house?", options: ["A) A Vogon landing strip", "B) A municipal bypass", "C) A pub extension", "D) A park"], ans: "B" },
+            { q: "Who is the President of the Imperial Galactic Government?", options: ["A) Prostetnic Vogon Jeltz", "B) Zaphod Beeblebrox", "C) Ford Prefect", "D) Oolon Colluphid"], ans: "B" },
+            { q: "What physical feature was added to Zaphod Beeblebrox to assist in ski-boxing?", options: ["A) A third arm", "B) A third eye", "C) Jet boots", "D) A second brain"], ans: "A" },
+            { q: "What phrase is inscribed in large, friendly letters on the cover of the Guide?", options: ["A) KEEP CALM", "B) DON'T PANIC", "C) KNOW YOUR TOWEL", "D) BEWARE THE LEOPARD"], ans: "B" },
+            { q: "According to the Guide, what drink feels like having your brains smashed out by a slice of lemon around a gold brick?", options: ["A) Earth Beer", "B) Pan Galactic Gargle Blaster", "C) Sub-Etha Ale", "D) Vogon Tonic"], ans: "B" },
+            { q: "What ancestor is Mr. L. Prosser a direct male-line descendant of?", options: ["A) Julius Caesar", "B) Genghis Khan", "C) Alexander the Great", "D) Napoleon"], ans: "B" },
+            { q: "Where were the demolition plans for Arthur's house hidden on Earth?", options: ["A) A locked cabinet in a disused lavatory", "B) On Alpha Centauri", "C) In the Mayor's office", "D) At the local pub"], ans: "A" },
+            { q: "Where were the demolition plans for Earth on display for 50 Earth years?", options: ["A) Islington", "B) Alpha Centauri", "C) Betelgeuse", "D) Damogran"], ans: "B" },
+            { q: "Why does Ford Prefect make Arthur drink three pints of beer at the Horse and Groom?", options: ["A) To celebrate", "B) As a muscle relaxant for matter transference shock", "C) To pass time", "D) To spend remaining money"], ans: "B" },
+            { q: "What term denotes a remarkably together hitchhiker who knows where his towel is?", options: ["A) Strag", "B) Hoopy frood", "C) Vogon", "D) Betelgeusian"], ans: "B" },
+            { q: "What non-hitchhikers are referred to as in galactic slang?", options: ["A) Froods", "B) Strags", "C) Vogons", "D) Earthlings"], ans: "B" },
+            { q: "What prototype starship powered by the Infinite Improbability Drive does Zaphod steal?", options: ["A) Heart of Gold", "B) Vogon Constructor Flagship", "C) Sub-Etha Express", "D) Starship Enterprise"], ans: "A" },
+            { q: "What shape is the stolen Heart of Gold starship?", options: ["A) A massive yellow slab", "B) A sleek running shoe", "C) A flying saucer", "D) A perfect sphere"], ans: "B" },
+            { q: "What is Trillian's original Earth name?", options: ["A) Tricia McMillan", "B) Paula Jennings", "C) Gail Andrews", "D) Sarah Jane"], ans: "A" },
+            { q: "Where did Arthur Dent first meet Trillian before Earth's destruction?", options: ["A) At a radio station", "B) At a party in an Islington flat", "C) At the local pub", "D) In Rickmansworth"], ans: "B" },
+            { q: "How is Vogon poetry ranked in terms of terrible quality in the universe?", options: ["A) 1st worst", "B) 2nd worst", "C) 3rd worst", "D) 5th worst"], ans: "C" },
+            { q: "Who wrote the single worst poetry in the entire universe?", options: ["A) Prostetnic Vogon Jeltz", "B) The Azagoths of Kria", "C) Paula Nancy Millstone Jennings", "D) Oolon Colluphid"], ans: "C" },
+            { q: "How long can a human survive holding a lungful of air in open space?", options: ["A) 10 seconds", "B) 30 seconds", "C) 60 seconds", "D) 2 minutes"], ans: "B" },
+            { q: "What calculated odds were matched for Ford and Arthur's open space rescue?", options: ["A) 2^276,709 to 1 against", "B) 1,000,000 to 1 against", "C) 42 to 1 against", "D) 100,000 to 1 against"], ans: "A" },
+            { q: "What was 276709 in Arthur's previous Earth life?", options: ["A) His library card number", "B) The Islington flat phone number", "C) His house address", "D) His postal code"], ans: "B" },
+            { q: "What book author wrote 'Well That About Wraps It Up For God'?", options: ["A) Oolon Colluphid", "B) Zaphod Beeblebrox", "C) Ford Prefect", "D) Prostetnic Vogon"], ans: "A" },
+            { q: "What planetary PA announcement method was used by Vogons to announce Earth's demolition?", options: ["A) Telepathic pulse", "B) Public address via every radio, hi-fi, and tin can", "C) Sky projections", "D) Holograms"], ans: "B" },
+            { q: "Which planet does Ford Prefect originate near?", options: ["A) Alpha Centauri", "B) Betelgeuse", "C) Damogran", "D) Poghril"], ans: "B" },
+            { q: "What weapon did Zaphod use to steal the Heart of Gold during its unveiling?", options: ["A) A Paralyso-Matic bomb", "B) A Vogon blaster", "C) A Sub-Etha beam", "D) A stun gun"], ans: "A" },
+            { q: "What happens when God is confronted with the Babel Fish proof?", options: ["A) God smiles", "B) God vanishes in a puff of logic", "C) God creates another fish", "D) God strikes man down"], ans: "B" },
+            { q: "What is the primary psychological value of carrying a towel?", options: ["A) Strags assume you also possess toiletries and will lend them", "B) It frightens Vogons", "C) It unlocks doors", "D) It functions as a transmitter"], ans: "A" },
+            { q: "What snack does Ford buy at the pub to replenish salt and protein after matter transference?", options: ["A) Crisps", "B) Peanuts", "C) Pretzels", "D) Biscuits"], ans: "B" },
+            { q: "What line did the blubbery Vogon guard repeatedly shout while dragging Ford and Arthur?", options: ["A) Order in triplicate!", "B) Resistance is useless!", "C) No hitchhiking!", "D) Prepare for ejection!"], ans: "B" },
+            { q: "Where was the Heart of Gold unveiled to the public?", options: ["A) On Earth", "B) On the island of France on Damogran", "C) On Betelgeuse", "D) On Poghril"], ans: "B" },
+            { q: "What day of the week could Arthur Dent 'never get the hang of'?", options: ["A) Mondays", "B) Thursdays", "C) Fridays", "D) Sundays"], ans: "B" },
+            { q: "What device in Ford's satchel winks rapidly when spacecraft approach?", options: ["A) Babel Fish", "B) Sub-Etha Sens-O-Matic", "C) Electronic Thumb", "D) Infinite Improbability Drive"], ans: "B" },
+            { q: "What local scenery suddenly materializes on the Heart of Gold as probability levels fluctuate?", options: ["A) Southend seafront", "B) London Eye", "C) Rickmansworth café", "D) Guildford pub"], ans: "A" },
+            { q: "What animal does Ford temporarily transform into due to the Improbability Drive?", options: ["A) A dolphin", "B) A penguin", "C) A white mouse", "D) An ape"], ans: "B" },
+            { q: "What literary work are infinite monkeys outside demanding to discuss as probability fluctuates?", options: ["A) Macbeth", "B) Hamlet", "C) Romeo and Juliet", "D) The Odyssey"], ans: "B" },
+            { q: "What initial single word entry did the Guide have for Earth before Ford's research?", options: ["A) Harmless", "B) Primitive", "C) Boring", "D) Ignorant"], ans: "A" },
+            { q: "What job did Ford claim to have while stranded on Earth for 15 years?", options: ["A) Out-of-work actor from Guildford", "B) Radio broadcaster", "C) Council inspector", "D) Pub bartender"], ans: "A" },
+            { q: "What species are the inhabitants of Earth descended from according to the Prologue?", options: ["A) Reptiles", "B) Apes", "C) Vogons", "D) Betelgeusians"], ans: "B" },
+            { q: "What items were humans perpetually obsessed with prioritizing over well-being?", options: ["A) Digital watches and green paper money", "B) Gold bricks", "C) Spacecraft", "D) Teacups"], ans: "A" },
+            { q: "Where was a girl sitting when she figured out how to make the world good and happy right before it was destroyed?", options: ["A) A café in Rickmansworth", "B) A pub in Islington", "C) A house in Guildford", "D) A lab in Oxford"], ans: "A" },
+            { q: "What chairs were Ford and Arthur strapped into while tortured by Vogon poetry?", options: ["A) Electro-shock recliners", "B) Poetry Appreciation Chairs", "C) Resistance chairs", "D) Improbability seats"], ans: "B" },
+            { q: "What career promotion did the Vogon guard hope to achieve instead of pursuing music or art?", options: ["A) Captain", "B) Senior Shouting Officer", "C) Chief Poet", "D) Fleet Inspector"], ans: "B" },
+            { q: "What musical motif did Ford Prefect hum right as the airlock opened to eject them?", options: ["A) Beethoven's Fifth Symphony", "B) Mozart's Requiem", "C) Bach's Toccata", "D) A Betelgeusian ballad"], ans: "A" },
+            { q: "What computer voice welcomed Ford and Arthur aboard the Heart of Gold?", options: ["A) A hostile military drone", "B) A pleasant computer voice", "C) Marvin the android", "D) A Vogon commander"], ans: "B" },
+            { q: "What items fell out of the void across space during the improbability rescue tear?", options: ["A) Paper party hats and balloons", "B) Gold coins", "C) Towels and peanuts", "D) Teacups and saucers"], ans: "A" },
+            { q: "What happened on Poghril due to the improbable tear in space-time?", options: ["A) 239,000 fried eggs landed", "B) It exploded", "C) Rain turned into beer", "D) Monkeys took over"], ans: "A" },
+            { q: "What color were the Vogon constructor fleet ships?", options: ["A) Bright red", "B) Yellow", "C) Silver", "D) Dark blue"], ans: "B" }
+        ];
+
+        // ================= GLOBAL STATE =================
+        let activeQuestions = [];
+        let quizAnswers = { 0: null, 1: null, 2: null, 3: null, 4: null };
+        let quizEvaluated = false;
+        let quizCorrectCount = 0;
+        let quizPoints = 0;
+        
+        // Strict 3-Draw Limit State
+        let drawsRemaining = 3;
+
+        // Timer State
+        let timerSeconds = 50 * 60;
+        let timerInterval = null;
+        let timerRunning = false;
+
+        // Technology Randomizer Data Groups
+        const techGroup1 = [
+            { name: "Digital Watches & Paper Money", chapter: "Prologue & Ch 1", desc: "Human obsession with primitive digital tech and green paper currency.", tags: ["Theme: Human Absurdity", "Setting: Pre-Demolition Earth"] },
+            { name: "Pan Galactic Gargle Blaster", chapter: "Chapter 2", desc: "The ultimate galactic cocktail; feels like lemon wrapped round a gold brick.", tags: ["Setting: Cosmic Culture", "Theme: Comedic Excess"] },
+            { name: "A Towel & Hitchhiking Satchel", chapter: "Chapter 3", desc: "The most massively useful physical and psychological asset for hitchhikers.", tags: ["Character: Ford Prefect", "Theme: Cosmic Survival"] },
+            { name: "Sub-Etha Sens-O-Matic & Electronic Thumb", chapter: "Chapter 3", desc: "Sensors that wink to alert approaching starships and flag down rides.", tags: ["Plot: Space Travel", "Conflict: Escaping Demolition"] }
+        ];
+
+        const techGroup2 = [
+            { name: "Infinite Improbability Drive", chapter: "Ch 4 & 9", desc: "Crosses lightyears instantly while triggering wildly improbable events.", tags: ["Setting: Deep Space", "Plot: Improbable Rescue"] },
+            { name: "Dentrassi Catering & Vogon Transference", chapter: "Chapter 5", desc: "Wild cooks on Vogon fleets who help hitchhikers onboard just to annoy Vogons.", tags: ["Conflict: Bureaucracy", "Character: Dentrassi vs Vogons"] },
+            { name: "The Babel Fish", chapter: "Chapter 6", desc: "Translating fish placed in the ear; paradoxically disproves God's existence.", tags: ["Theme: Philosophical Satire", "Plot: Language Translation"] },
+            { name: "Vogon Poetry Appreciation Chair", chapter: "Chapter 7", desc: "Torture device used while reciting the 3rd worst poetry in the universe.", tags: ["Character: Vogon Bureaucrats", "Conflict: Torture by Verse"] }
+        ];
+
+        let assignedTech1 = null;
+        let assignedTech2 = null;
+
+        // ================= 50-MIN TIMER LOGIC =================
+        function updateTimerDisplay() {
+            const m = Math.floor(timerSeconds / 60);
+            const s = timerSeconds % 60;
+            document.getElementById('timerDisplay').innerText = 
+                `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function toggleTimer() {
+            const btn = document.getElementById('startTimerBtn');
+            if (!timerRunning) {
+                timerRunning = true;
+                btn.innerText = "Pause Clock";
+                document.getElementById('timerDisplay').classList.add('timer-active');
+                timerInterval = setInterval(() => {
+                    if (timerSeconds > 0) {
+                        timerSeconds--;
+                        updateTimerDisplay();
+                    } else {
+                        clearInterval(timerInterval);
+                        timerRunning = false;
+                        alert("Time limit reached! Proceed to Step 5 to complete your submission report.");
+                    }
+                }, 1000);
+            } else {
+                clearInterval(timerInterval);
+                timerRunning = false;
+                btn.innerText = "Resume Clock";
+                document.getElementById('timerDisplay').classList.remove('timer-active');
+            }
+        }
+
+        function resetTimer() {
+            clearInterval(timerInterval);
+            timerRunning = false;
+            timerSeconds = 50 * 60;
+            updateTimerDisplay();
+            document.getElementById('startTimerBtn').innerText = "Start Clock";
+            document.getElementById('timerDisplay').classList.remove('timer-active');
+        }
+
+        // ================= TAB NAVIGATION =================
+        function switchTab(tabIndex) {
+            for (let i = 0; i < 5; i++) {
+                const btn = document.getElementById(`tabBtn${i}`);
+                const panel = document.getElementById(`panel${i}`);
+                if (i === tabIndex) {
+                    btn.classList.add('active');
+                    panel.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('active');
+                    panel.classList.add('hidden');
+                }
+            }
+
+            if (tabIndex === 4) {
+                updateStep5Summary();
+            }
+        }
+
+        // ================= QUIZ & SCORE CALCULATION =================
+        function getRandom5Questions() {
+            const shuffled = [...FULL_QUESTION_BANK].sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 5);
+        }
+
+        function renderQuiz() {
+            activeQuestions = getRandom5Questions();
+            quizAnswers = { 0: null, 1: null, 2: null, 3: null, 4: null };
+            quizEvaluated = false;
+            quizCorrectCount = 0;
+            quizPoints = 0;
+
+            const container = document.getElementById('quizQuestionsContainer');
+            container.innerHTML = '';
+
+            activeQuestions.forEach((qObj, qIdx) => {
+                const qDiv = document.createElement('div');
+                qDiv.className = 'bg-slate-950/70 p-4 rounded-xl border border-cyan-900 shadow-sm';
+                qDiv.id = `qBlock${qIdx}`;
+
+                let optionsHtml = '';
+                qObj.options.forEach((optText) => {
+                    const letter = optText.substring(0, 1);
+                    optionsHtml += `
+                        <div class="quiz-option p-3 rounded-lg text-xs" onclick="selectAnswer(${qIdx}, '${letter}', this)">
+                            ${optText}
+                        </div>
+                    `;
+                });
+
+                qDiv.innerHTML = `
+                    <p class="font-semibold text-cyan-200 text-sm mb-2.5">
+                        <span class="text-amber-400 font-bold">Q${qIdx + 1}:</span> ${qObj.q}
+                    </p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-2">
+                        ${optionsHtml}
+                    </div>
+                `;
+                container.appendChild(qDiv);
+            });
+
+            document.getElementById('submitQuizBtn').disabled = false;
+            document.getElementById('quizScoreDisplay').innerText = "0 / 5 Correct (0 / 50 Points)";
+        }
+
+        function selectAnswer(qIdx, letter, elem) {
+            if (quizEvaluated) return;
+            quizAnswers[qIdx] = letter;
+
+            const block = document.getElementById(`qBlock${qIdx}`);
+            const opts = block.querySelectorAll('.quiz-option');
+            opts.forEach(o => o.classList.remove('selected'));
+            elem.classList.add('selected');
+        }
+
+        function evaluateQuiz() {
+            if (quizEvaluated) return;
+
+            let unanswered = false;
+            for (let i = 0; i < 5; i++) {
+                if (!quizAnswers[i]) unanswered = true;
+            }
+
+            if (unanswered) {
+                alert("Please answer all 5 questions to verify your security clearance.");
+                return;
+            }
+
+            quizEvaluated = true;
+            quizCorrectCount = 0;
+
+            activeQuestions.forEach((qObj, qIdx) => {
+                const block = document.getElementById(`qBlock${qIdx}`);
+                const opts = block.querySelectorAll('.quiz-option');
+                const userAns = quizAnswers[qIdx];
+                const correct = qObj.ans;
+
+                if (userAns === correct) {
+                    quizCorrectCount++;
+                }
+
+                opts.forEach(opt => {
+                    const text = opt.innerText.trim();
+                    if (text.startsWith(correct)) {
+                        opt.classList.add('correct');
+                    } else if (text.startsWith(userAns) && userAns !== correct) {
+                        opt.classList.add('incorrect');
+                    }
+                });
+            });
+
+            // Score Calculation: 10 points per correct question (Max 50 points = 50% Grade)
+            quizPoints = quizCorrectCount * 10;
+            document.getElementById('quizScoreDisplay').innerText = `${quizCorrectCount} / 5 Correct (${quizPoints} / 50 Points)`;
+
+            // Lock further draws once submitted
+            drawsRemaining = 0;
+            updateDrawUI();
+
+            document.getElementById('submitQuizBtn').disabled = true;
+            alert(`Security Clearance Evaluated!\nScore: ${quizCorrectCount}/5 Correct (${quizPoints}/50 Points)\n\nAnswers are now locked. Proceed to Step 2.`);
+        }
+
+        function resetQuizAndPickNewQuestions() {
+            if (drawsRemaining <= 0) {
+                alert("Redraw limit reached (0 remaining). You must lock in your current set of questions.");
+                return;
+            }
+
+            if (confirm(`Draw a new set of 5 questions? (${drawsRemaining - 1} redraws remaining after this)`)) {
+                drawsRemaining--;
+                updateDrawUI();
+                renderQuiz();
+            }
+        }
+
+        function updateDrawUI() {
+            document.getElementById('drawCountBadge').innerText = `Limit: ${drawsRemaining} Draws Left`;
+            document.getElementById('drawBtnCount').innerText = `${drawsRemaining} Left`;
+            document.getElementById('redrawLockStatus').innerText = `Draws Remaining: ${drawsRemaining}/3`;
+
+            if (drawsRemaining <= 0) {
+                const btn = document.getElementById('drawQuestionsBtn');
+                btn.disabled = true;
+                btn.innerHTML = "🔒 Draws Locked";
+                btn.classList.add("opacity-50");
+            }
+        }
+
+        // ================= TECH RANDOMIZER & AI SYNTHESIZER =================
+        function generateTechPairing() {
+            const i1 = Math.floor(Math.random() * techGroup1.length);
+            const i2 = Math.floor(Math.random() * techGroup2.length);
+
+            assignedTech1 = techGroup1[i1];
+            assignedTech2 = techGroup2[i2];
+
+            document.getElementById('tech1Title').innerText = assignedTech1.name;
+            document.getElementById('tech1Chapter').innerText = assignedTech1.chapter;
+            document.getElementById('tech1Desc').innerText = assignedTech1.desc;
+            document.getElementById('tech1Tags').innerHTML = assignedTech1.tags
+                .map(t => `<span class="text-[10px] bg-cyan-950 text-cyan-300 px-2 py-0.5 rounded border border-cyan-800 font-semibold">${t}</span>`).join('');
+
+            document.getElementById('tech2Title').innerText = assignedTech2.name;
+            document.getElementById('tech2Chapter').innerText = assignedTech2.chapter;
+            document.getElementById('tech2Desc').innerText = assignedTech2.desc;
+            document.getElementById('tech2Tags').innerHTML = assignedTech2.tags
+                .map(t => `<span class="text-[10px] bg-amber-950 text-amber-300 px-2 py-0.5 rounded border border-amber-800 font-semibold">${t}</span>`).join('');
+
+            // Synthesize Prompt with Digital Props Focus
+            const prompt = `Write a high-energy 60-to-90-second video trailer script pitching Douglas Adams's novel 'The Hitchhiker's Guide to the Galaxy' directly to next year's incoming junior class.
+
+Requirements:
+1. Speak directly to incoming juniors as an experienced peer, making the book sound exciting and fun.
+2. Incorporate Focus Point #1: '${assignedTech1.name}' (${assignedTech1.chapter}) - ${assignedTech1.desc}.
+3. Incorporate Focus Point #2: '${assignedTech2.name}' (${assignedTech2.chapter}) - ${assignedTech2.desc}.
+4. Connect both items to literary elements (plot events, character traits, setting, or central theme).
+5. Suggest 2-3 visual video effects using Canva digital props (e.g., Digital Towel Graphic Sticker, CRT Retro Terminal Green Filter overlay, or animated 'DON'T PANIC' glowing text).
+6. Conclude with Douglas Adams's famous line: 'DON'T PANIC!'`;
+
+            document.getElementById('aiPromptBox').value = prompt;
+        }
+
+        function lockPairingAndShowRubric() {
+            if (!assignedTech1 || !assignedTech2) {
+                alert("Please spin the randomizer first!");
+                return;
+            }
+            document.getElementById('rubricContainer').classList.remove('hidden');
+            alert("Focus points locked! Rubric revealed below. Proceed to Step 4.");
+        }
+
+        function copyAiPrompt() {
+            const text = document.getElementById('aiPromptBox').value;
+            if (!text || text.includes("=== Unassigned ===")) {
+                alert("Please spin the tech randomizer in Step 3 first!");
+                return;
+            }
+
+            const dummy = document.createElement("textarea");
+            document.body.appendChild(dummy);
+            dummy.value = text;
+            dummy.select();
+            document.execCommand("copy");
+            document.body.removeChild(dummy);
+
+            alert("AI Prompt copied to clipboard!");
+        }
+
+        // ================= CHECKLIST & EDITORS =================
+        function updateChecklistProgress() {
+            const ids = ['checkPlot', 'checkTech1', 'checkTech2', 'checkLit', 'checkFx'];
+            let checked = 0;
+            ids.forEach(id => {
+                if (document.getElementById(id).checked) checked++;
+            });
+
+            const pct = Math.round((checked / ids.length) * 100);
+            document.getElementById('checklistPercent').innerText = `${pct}%`;
+            document.getElementById('checklistBar').style.width = `${pct}%`;
+        }
+
+        document.getElementById('scriptText').addEventListener('input', function() {
+            const val = this.value.trim();
+            const words = val ? val.split(/\s+/).length : 0;
+            document.getElementById('wordCountDisplay').innerText = `Word count: ${words} words`;
+            const seconds = Math.round(words / 2.16);
+            document.getElementById('readTimeDisplay').innerText = `${seconds}s`;
+        });
+
+        // ================= STEP 5: SUMMARY & PDF GENERATOR =================
+        function updateStep5Summary() {
+            document.getElementById('summaryQuizScore').innerText = quizEvaluated 
+                ? `${quizCorrectCount} / 5 Correct (${quizPoints} / 50 Points)` 
+                : "Pending Answers (Step 1)";
+
+            document.getElementById('summaryTech1').innerText = assignedTech1 ? `${assignedTech1.name} (${assignedTech1.chapter})` : 'Unassigned';
+            document.getElementById('summaryTech2').innerText = assignedTech2 ? `${assignedTech2.name} (${assignedTech2.chapter})` : 'Unassigned';
+            
+            const ids = ['checkPlot', 'checkTech1', 'checkTech2', 'checkLit', 'checkFx'];
+            let checked = 0;
+            ids.forEach(id => { if (document.getElementById(id).checked) checked++; });
+            document.getElementById('summaryChecklistPct').innerText = `${Math.round((checked / ids.length) * 100)}%`;
+        }
+
+        function generatePDFReport() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const name = document.getElementById('studentName').value.trim() || 'Arthur Dent (Anonymous)';
+            const period = document.getElementById('classPeriod').value.trim() || 'Unassigned Sector';
+            const script = document.getElementById('scriptText').value.trim() || '[No Script Text Provided]';
+            const canvaUrl = document.getElementById('canvaUrlInput').value.trim() || 'No Canva Link Provided';
+            const timestamp = new Date().toLocaleString();
+
+            const t1Name = assignedTech1 ? `${assignedTech1.name} (${assignedTech1.chapter})` : 'Unassigned';
+            const t2Name = assignedTech2 ? `${assignedTech2.name} (${assignedTech2.chapter})` : 'Unassigned';
+
+            // Gather Selected Digital Props
+            let propsList = [];
+            if (document.getElementById('fxTowel').checked) propsList.push("Digital Towel Sticker");
+            if (document.getElementById('fxFilter').checked) propsList.push("CRT Green Terminal Filter");
+            if (document.getElementById('fxText').checked) propsList.push("DON'T PANIC Dynamic Text");
+            const propsStr = propsList.length > 0 ? propsList.join(", ") : "None selected";
+
+            // Document Header
+            doc.setFont("courier", "bold");
+            doc.setFontSize(15);
+            doc.text("OFFICIAL SUBMISSION EVALUATION REPORT", 10, 15);
+            doc.setFontSize(9);
+            doc.setFont("courier", "normal");
+            doc.text(`Hitchhiker's Guide Quest Compass • Generated: ${timestamp}`, 10, 21);
+            doc.line(10, 24, 200, 24);
+
+            // Student Metadata & Quiz Score Section
+            doc.setFont("courier", "bold");
+            doc.setFontSize(11);
+            doc.text("STUDENT & EVALUATION METRICS:", 10, 32);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(10);
+            doc.text(`Student Name       : ${name}`, 15, 39);
+            doc.text(`Class Period/Sector: ${period}`, 15, 45);
+            doc.setFont("courier", "bold");
+            doc.text(`Step 1 Quiz Score  : ${quizCorrectCount}/5 Correct (${quizPoints}/50 Points) [50% Total Grade]`, 15, 51);
+
+            // Assigned Tech Section
+            doc.setFont("courier", "normal");
+            doc.setFont("courier", "bold");
+            doc.text("ASSIGNED LITERARY FOCUS POINTS:", 10, 61);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(10);
+            doc.text(`Focus #1 (Ch. 1-3): ${t1Name}`, 15, 68);
+            doc.text(`Focus #2 (Ch. 4-9): ${t2Name}`, 15, 74);
+
+            // Digital Props Section
+            doc.setFont("courier", "bold");
+            doc.text("DIGITAL PROPS & CANVA VISUAL FX:", 10, 84);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(10);
+            doc.text(`Props / Effects Used: ${propsStr}`, 15, 91);
+
+            // Canva Link Section
+            doc.setFont("courier", "bold");
+            doc.text("CANVA VIDEO RECORDING LINK (50% Remaining Grade):", 10, 101);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(9);
+            const splitUrl = doc.splitTextToSize(canvaUrl, 180);
+            doc.text(splitUrl, 15, 108);
+
+            let currentY = 108 + (splitUrl.length * 5) + 6;
+
+            // Script Section
+            doc.setFont("courier", "bold");
+            doc.setFontSize(11);
+            doc.text("PROMO HOOK SCRIPT TRANSCRIPT:", 10, currentY);
+            doc.setFont("courier", "normal");
+            doc.setFontSize(9);
+            currentY += 7;
+
+            const splitScript = doc.splitTextToSize(script, 180);
+            
+            for (let i = 0; i < splitScript.length; i++) {
+                if (currentY > 275) {
+                    doc.addPage();
+                    currentY = 20;
+                }
+                doc.text(splitScript[i], 15, currentY);
+                currentY += 5;
+            }
+
+            // Save PDF Output
+            const safeName = name.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+            const filename = `Vogon_Official_Evaluation_${safeName}.pdf`;
+            doc.save(filename);
+
+            const status = document.getElementById('pdfStatusMsg');
+            status.innerText = `✓ PDF evaluation report compiled and downloaded as ${filename}`;
+            status.classList.remove('hidden');
+        }
+
+        // Initialize App State
+        window.onload = function() {
+            renderQuiz();
+            generateTechPairing();
+            updateTimerDisplay();
+        };
+    </script>
+</body>
+</html>
